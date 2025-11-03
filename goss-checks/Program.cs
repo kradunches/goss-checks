@@ -7,72 +7,36 @@ using Org.BouncyCastle.OpenSsl;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var AppAllowSpecificOrigins = "_appAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
+    options.AddPolicy(name: AppAllowSpecificOrigins,
+        policy =>
+        {
+            // policy.WithOrigins("https://kodaktor.ru/")
+            policy.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
 });
 
 var app = builder.Build();
 
-app.MapGet("/login", () => { return Results.Text("cheryaev", "text/plain"); });
-
-app.MapPost("/decypher", async (HttpRequest req) =>
+app.Use(async (context, next) =>
 {
-    var form = await req.ReadFormAsync();
-    var keyFile = form.Files["key"];
-    var secretFile = form.Files["secret"];
+    context.Response.Headers["X-Author"] = "d5e5c122-0957-4501-971a-e81248c8522c";
+    context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+    context.Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0";
+    context.Response.Headers["Pragma"] = "no-cache";
+    context.Response.Headers["Expires"] = "0";
+    await next();
+});
 
-    AsymmetricKeyParameter privateKey;
-    using (var ks = keyFile.OpenReadStream())
-    using (var sr = new StreamReader(ks, Encoding.UTF8, true))
-    {
-        var pem = new PemReader(sr);
-        var obj = pem.ReadObject();
+app.UseCors(AppAllowSpecificOrigins);
 
-        if (obj is AsymmetricCipherKeyPair pair)
-            privateKey = pair.Private;
-        else if (obj is AsymmetricKeyParameter akp)
-            privateKey = akp;
-        else
-            return Results.BadRequest("Unsupported key format");
-    }
-
-    byte[] cipherBytes;
-    using (var ss = secretFile.OpenReadStream())
-    using (var ms = new MemoryStream())
-    {
-        await ss.CopyToAsync(ms);
-        cipherBytes = ms.ToArray();
-    }
-
-    byte[] plain;
-    try
-    {
-        var oaep = new OaepEncoding(new RsaEngine(), new Sha1Digest());
-        oaep.Init(false, privateKey);
-        plain = oaep.ProcessBlock(cipherBytes, 0, cipherBytes.Length);
-    }
-    catch
-    {
-        try
-        {
-            var pkcs1 = new Pkcs1Encoding(new RsaEngine());
-            pkcs1.Init(false, privateKey);
-            plain = pkcs1.ProcessBlock(cipherBytes, 0, cipherBytes.Length);
-        }
-        catch (Exception e)
-        {
-            return Results.BadRequest($"Decryption failed: {e.Message}");
-        }
-    }
-
-    var result = Encoding.UTF8.GetString(plain).Trim('\r', '\n');
-    return Results.Text(result, "text/plain");
+app.MapGet("/", () =>
+{
+    return "d5e5c122-0957-4501-971a-e81248c8522c";
 });
 
 app.Run();
