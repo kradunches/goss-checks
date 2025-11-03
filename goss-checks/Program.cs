@@ -41,6 +41,11 @@ app.MapGet("/", () =>
     return "d5e5c122-0957-4501-971a-e81248c8522c";
 });
 
+app.MapGet("/login", () =>
+{
+    return "d5e5c122-0957-4501-971a-e81248c8522c";
+});
+
 app.MapGet("/sample", () =>
 {
     return @"function task(x) {
