@@ -26,6 +26,8 @@ app.Use(async (context, next) =>
 {
     context.Response.Headers["X-Author"] = "d5e5c122-0957-4501-971a-e81248c8522c";
     context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+    context.Response.Headers["Content-Type"] = "text/plain; charset=UTF-8";
+    
     context.Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0";
     context.Response.Headers["Pragma"] = "no-cache";
     context.Response.Headers["Expires"] = "0";
@@ -37,6 +39,13 @@ app.UseCors(AppAllowSpecificOrigins);
 app.MapGet("/", () =>
 {
     return "d5e5c122-0957-4501-971a-e81248c8522c";
+});
+
+app.MapGet("/sample", () =>
+{
+    return @"function task(x) {
+  return x * this ** 2;
+}";
 });
 
 app.Run();
