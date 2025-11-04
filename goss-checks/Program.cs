@@ -41,6 +41,40 @@ app.MapGet("/", () =>
     return "d5e5c122-0957-4501-971a-e81248c8522c";
 });
 
+app.MapGet("/promise", () =>
+{
+    return @"function task(x) {
+    return new Promise((res, rej) => x < 18 ? res('yes') : rej('no'));
+}
+";
+});
+
+app.MapGet("/fetch", () =>
+{
+    var html = @"<!doctype html>
+<html>
+<head><meta charset=""utf-8""></head>
+<body>
+    <input id=""inp"" />
+    <button id=""bt"">fetch</button>
+    <script>
+        document.getElementById('bt').addEventListener('click', async function() {
+            var inp = document.getElementById('inp');
+            try {
+                var res = await fetch(inp.value);
+                var text = await res.text();
+                inp.value = text;
+            } catch (e) {
+                inp.value = e.toString();
+            }
+        });
+    </script>
+</body>
+</html>
+";
+    return Results.Content(html, "text/html; charset=UTF-8");
+});
+
 app.MapGet("/login", () =>
 {
     return "d5e5c122-0957-4501-971a-e81248c8522c";
