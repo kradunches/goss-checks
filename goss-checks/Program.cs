@@ -1,9 +1,4 @@
 using System.Text;
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.Encodings;
-using Org.BouncyCastle.Crypto.Engines;
-using Org.BouncyCastle.OpenSsl;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +19,7 @@ var app = builder.Build();
 
 app.Use(async (context, next) =>
 {
-    context.Response.Headers["X-Author"] = "d5e5c122-0957-4501-971a-e81248c8522c";
+    context.Response.Headers["X-Author"] = "1bf34f4b-416a-4270-a0a8-46d2aa5cde89";
     context.Response.Headers["Access-Control-Allow-Origin"] = "*";
     context.Response.Headers["Content-Type"] = "text/plain; charset=UTF-8";
     
@@ -38,7 +33,7 @@ app.UseCors(AppAllowSpecificOrigins);
 
 app.MapGet("/", () =>
 {
-    return "d5e5c122-0957-4501-971a-e81248c8522c";
+    return "1bf34f4b-416a-4270-a0a8-46d2aa5cde89";
 });
 
 app.MapGet("/promise", () =>
