@@ -19,7 +19,7 @@ var app = builder.Build();
 
 app.Use(async (context, next) =>
 {
-    context.Response.Headers["X-Author"] = "1bf34f4b-416a-4270-a0a8-46d2aa5cde89";
+    context.Response.Headers["X-Author"] = "d5e5c122-0957-4501-971a-e81248c8522c";
     context.Response.Headers["Access-Control-Allow-Origin"] = "*";
     context.Response.Headers["Content-Type"] = "text/plain; charset=UTF-8";
     
@@ -33,7 +33,7 @@ app.UseCors(AppAllowSpecificOrigins);
 
 app.MapGet("/", () =>
 {
-    return "1bf34f4b-416a-4270-a0a8-46d2aa5cde89";
+    return "d5e5c122-0957-4501-971a-e81248c8522c";
 });
 
 app.MapGet("/promise", () =>
@@ -72,7 +72,7 @@ app.MapGet("/fetch", () =>
 
 app.MapGet("/login", () =>
 {
-    return "1bf34f4b-416a-4270-a0a8-46d2aa5cde89";
+    return "d5e5c122-0957-4501-971a-e81248c8522c";
 });
 
 app.MapGet("/sample", () =>
@@ -80,6 +80,18 @@ app.MapGet("/sample", () =>
     return @"function task(x) {
   return x * this ** 2;
 }";
+});
+
+app.MapGet("/result4", async (HttpContext context) =>
+{
+    var xTest = context.Request.Headers["x-test"].ToString();
+    var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
+    return new Dictionary<string, object>
+    {
+        ["message"] = "d5e5c122-0957-4501-971a-e81248c8522c",
+        ["x-result"] = xTest,
+        ["x-body"] = body
+    };
 });
 
 app.Run();
