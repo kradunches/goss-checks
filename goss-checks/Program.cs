@@ -17,6 +17,8 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.UseCors(AppAllowSpecificOrigins);
+
 app.Use(async (context, next) =>
 {
     context.Response.Headers["X-Author"] = "d5e5c122-0957-4501-971a-e81248c8522c";
@@ -29,7 +31,6 @@ app.Use(async (context, next) =>
     await next();
 });
 
-app.UseCors(AppAllowSpecificOrigins);
 
 app.MapGet("/", () =>
 {
@@ -82,7 +83,7 @@ app.MapGet("/sample", () =>
 }";
 });
 
-app.MapGet("/result4", async (HttpContext context) =>
+app.Map("/result4", async (HttpContext context) =>
 {
     var xTest = context.Request.Headers["x-test"].ToString();
     var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
