@@ -1,8 +1,10 @@
-using System.Text.Json;
+using Microsoft.Playwright;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
+using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
-const string LOGIN = "d5e5c122-0957-4501-971a-e81248c8522c";
+const string LOGIN = "cheryaev";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +39,33 @@ app.Use(async (HttpContext context, RequestDelegate next) =>
 
 app.MapGet("/login", () => { return LOGIN; });
 
+app.MapGet("/zombie", async (HttpContext context) =>
+{
+  context.Request.Query.TryGetValue("number", out var numberParam);
+  int number = int.Parse(numberParam);
+  var playwright = await Playwright.CreateAsync();
+  await using var browser = await playwright.Chromium.LaunchAsync(new()
+  {
+    Headless = true
+  });
+
+  var page = await browser.NewPageAsync();
+
+  await page.GotoAsync($"https://kodaktor.ru/g/d7290da?{number}");
+
+  await page.WaitForSelectorAsync("button");
+
+  await page.ClickAsync("button");
+
+  await page.WaitForTimeoutAsync(1000);
+
+  var result = await page.TitleAsync();
+
+  await browser.CloseAsync();
+
+  return Results.Text(result);
+});
+
 app.MapPost("/size2json", async (HttpContext context) =>
 {
     IFormCollection formData = await context.Request.ReadFormAsync();
@@ -50,6 +79,28 @@ app.MapPost("/size2json", async (HttpContext context) =>
         var result = new { width = image.Width, height = image.Height };
 
         return Results.Json(result);
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
+});
+
+app.MapGet("/makeimage", async (HttpContext context) =>
+{
+    try
+    {
+        int.TryParse(context.Request.Query["width"], out int width);
+        int.TryParse(context.Request.Query["height"], out int height);
+
+        using var image = new Image<SixLabors.ImageSharp.PixelFormats.Rgba32>(width, height);
+        using var ms = new MemoryStream();
+        await image.SaveAsPngAsync(ms);
+        ms.Position = 0;
+
+        context.Response.ContentType = "image/png";
+        await context.Response.Body.WriteAsync(ms.ToArray());
+        return Results.Empty;
     }
     catch (Exception ex)
     {
